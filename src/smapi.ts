@@ -263,7 +263,10 @@ export const shouldScrobble = (track: Track, playbackTime: number) => (
   (track.duration < 30 && playbackTime >= 10) ||
   (track.duration >= 30 && playbackTime >= 30))
 
-const playlist = (bonobUrl: URLBuilder, playlist: Playlist) => ({
+type PlaylistLike = Pick<Playlist, "id" | "name" | "coverArt">;
+
+const playlist = (bonobUrl: URLBuilder, playlist: PlaylistLike) => ({
+//const playlist = (bonobUrl: URLBuilder, playlist: Playlist) => ({
   itemType: "playlist",
   id: `playlist:${playlist.id}`,
   title: playlist.name,
