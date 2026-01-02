@@ -673,6 +673,35 @@ function bindSmapiSoapServiceToExpress(
                         // </getExtendedMetadataResult>
                       },
                     }));
+                  case "playlists":
+                    return musicLibrary
+                      .playlists()
+                      .then(slice2(paging))
+                      .then(([page, total]) => ({
+                        getExtendedMetadataResult: {
+                          count: page.length,
+                          index: paging._index,
+                          total,
+                          mediaCollection: page.map((it) =>
+                            playlist(urlWithToken(apiKey), it)
+                          ),
+                        },
+                      }));
+                  case "playlist":
+                    return musicLibrary
+                      .playlist(typeId!)
+                      .then((pl) => pl.entries)
+                      .then(slice2(paging))
+                      .then(([page, total]) => ({
+                        getExtendedMetadataResult: {
+                          count: page.length,
+                          index: paging._index,
+                          total,
+                          mediaMetadata: page.map((it) =>
+                            track(urlWithToken(apiKey), it)
+                          ),
+                        },
+                      }));                  
                   default:
                     // unsupported "artists"
                     throw `Unsupported getExtendedMetadata id=${id}`;
