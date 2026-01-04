@@ -615,14 +615,14 @@ function bindSmapiSoapServiceToExpress(
               index,
               count,
             }: // recursive,
-            { id: string; index?: number; count?: number; recursive: boolean },
+            { id: string; index: number; count: number; recursive: boolean },
             _,
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
               .then(withSplitId(id))
               .then(async ({ musicLibrary, apiKey, type, typeId }) => {
-                const paging = { _index: index ?? 0, _count: count ?? 100 };
+                const paging = { _index: index, _count: count };
                 switch (type) {
                   case "artist":
                     return musicLibrary.artist(typeId).then((artist) => {
