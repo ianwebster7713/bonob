@@ -686,7 +686,7 @@ function bindSmapiSoapServiceToExpress(
                           index: paging._index,
                           total,
                           mediaCollection: page.map((it) =>
-                            playlist(urlWithToken(apiKey), { ...it, entries: [] })
+                            playlist(urlWithToken(apiKey), it)
                           ),
                         },
                       }));
