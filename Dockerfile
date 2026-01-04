@@ -43,7 +43,17 @@ LABEL   maintainer="simojenki" \
         org.opencontainers.image.description="bonob SONOS SMAPI implementation" \
         org.opencontainers.image.licenses="GPLv3"
 
-ENV BNB_PORT=4534
+ENV BNB_PORT=44534
+ENV BNB_SONOS_SERVICE_ID=249
+ENV BNB_SONOS_SERVICE_NAME=ianbonob
+ENV BNB_URL=https://subsonic2.illuminatedsolutions.com.au:54534
+ENV BNB_SUBSONIC_URL=http://172.16.24.90:4533
+ENV BNB_SONOS_AUTO_REGISTER=false
+ENV BNB_SONOS_DEVICE_DISCOVERY=false
+ENV BNB_SERVER_LOG_REQUESTS=true
+ENV BNB_SECRET="#%WdSECRET#@51762488"
+ENV BNB_LOG_LEVEL=debug
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
