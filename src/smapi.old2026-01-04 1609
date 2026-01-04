@@ -615,14 +615,14 @@ function bindSmapiSoapServiceToExpress(
               index,
               count,
             }: // recursive,
-            { id: string; index: number; count: number; recursive: boolean },
+            { id: string; index?: number; count?: number; recursive: boolean },
             _,
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
               .then(withSplitId(id))
               .then(async ({ musicLibrary, apiKey, type, typeId }) => {
-                const paging = { _index: index, _count: count };
+                const paging = { _index: index ?? 0, _count: count ?? 100 };
                 switch (type) {
                   case "artist":
                     return musicLibrary.artist(typeId).then((artist) => {
@@ -676,28 +676,21 @@ function bindSmapiSoapServiceToExpress(
                         // </getExtendedMetadataResult>
                       },
                     }));
-                  case "playlists": {
-                    // Sonos sometimes calls getExtendedMetadata for playlists WITHOUT index/count.
-                    // If index/count are undefined, slice2 will return an empty page (and Sonos shows no playlists).
-                    const pagingSafe = {
-                      _index: Number.isFinite(paging._index) ? paging._index : 0,
-                      _count: Number.isFinite(paging._count) ? paging._count : 100,
-                    };
+                  case "playlists":
                     return musicLibrary
                       .playlists()
-                      .then(slice2(pagingSafe))
+                      .then(slice2(paging))
                       .then(([page, total]) => ({
                         getExtendedMetadataResult: {
                           count: page.length,
-                          index: pagingSafe._index,
+                          index: paging._index,
                           total,
                           mediaCollection: page.map((it) =>
-                            playlist(urlWithToken(apiKey), { ...it, entries: [] })
+                            playlist(urlWithToken(apiKey), it)
                           ),
                         },
                       }));
-                  }
-case "playlist":
+                  case "playlist":
                     return musicLibrary
                       .playlist(typeId!)
                       .then((pl) => pl.entries)
