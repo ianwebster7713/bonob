@@ -355,19 +355,22 @@ export const artist = (bonobUrl: URLBuilder, artist: ArtistSummary) => ({
   albumArtURI: coverArtURI(bonobUrl, { coverArt: artist.image }).href(),
 });
 
-const splitId = (id: string) => {
-  const [type, typeId] = id.split(":");
-  return <T>(t: T) => ({
+export const splitId = (id: string) => {
+  const [type, typeId] = id.split(":")
+  return {
+    type: type!!,
+    typeId: typeId!!
+  }
+}
+
+export function withSplitId<T>(id: string) {
+  return (t: T) => ({
     ...t,
-    type,
-    typeId,
+    ...splitId(id)
   });
-};
+}
 
 type SoapyHeaders = {
-  credentials?: Credentials;
-};
- = {
   credentials?: Credentials;
 };
 
@@ -512,7 +515,7 @@ function bindSmapiSoapServiceToExpress(
             soapyHeaders: SoapyHeaders
           ) => 
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(({ musicLibrary, apiKey, type, typeId }) => {
                 switch (type) {
                   case "internetRadioStation":
@@ -550,7 +553,7 @@ function bindSmapiSoapServiceToExpress(
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(async ({ musicLibrary, apiKey, type, typeId }) => {
                 switch (type) {
                   case "internetRadioStation":
@@ -572,7 +575,7 @@ function bindSmapiSoapServiceToExpress(
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(async ({ musicLibrary, apiKey }) => {
                 switch (id) {
                   case "albums":
@@ -617,7 +620,7 @@ function bindSmapiSoapServiceToExpress(
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(async ({ musicLibrary, apiKey, type, typeId }) => {
                 const paging = { _index: index, _count: count };
                 switch (type) {
@@ -674,27 +677,32 @@ function bindSmapiSoapServiceToExpress(
                       },
                     }));
                   case "playlists": {
-                    // Sonos sometimes calls getExtendedMetadata for playlists WITHOUT index/count.
-                    // If index/count are undefined, slice2 will return an empty page (and Sonos shows no playlists).
-                    const pagingSafe = {
-                      _index: Number.isFinite(paging._index) ? paging._index : 0,
-                      _count: Number.isFinite(paging._count) ? paging._count : 100,
-                    };
+                    const safeIndex =
+                      typeof index === "number" && Number.isFinite(index)
+                        ? index
+                        : 0;
+                    const safeCount =
+                      typeof count === "number" && Number.isFinite(count)
+                        ? count
+                        : 100;
+
+                    const safePaging = { _index: safeIndex, _count: safeCount };
+
                     return musicLibrary
                       .playlists()
-                      .then(slice2(pagingSafe))
+                      .then(slice2(safePaging))
                       .then(([page, total]) => ({
                         getExtendedMetadataResult: {
                           count: page.length,
-                          index: pagingSafe._index,
+                          index: safePaging._index,
                           total,
                           mediaCollection: page.map((it) =>
-                            playlist(urlWithToken(apiKey), { ...it, entries: [] })
+                            playlist(urlWithToken(apiKey), it)
                           ),
                         },
                       }));
                   }
-case "playlist":
+                  case "playlist":
                     return musicLibrary
                       .playlist(typeId!)
                       .then((pl) => pl.entries)
@@ -726,7 +734,7 @@ case "playlist":
             { headers }: Pick<Request, "headers">
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(({ musicLibrary, apiKey, type, typeId }) => {
                 const paging = { _index: index, _count: count };
                 const acceptLanguage = headers["accept-language"];
@@ -1085,7 +1093,7 @@ case "playlist":
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(({ musicLibrary, typeId }) =>
                 musicLibrary.addToPlaylist(parentId.split(":")[1]!, typeId)
               )
@@ -1096,7 +1104,7 @@ case "playlist":
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then((it) => ({
                 ...it,
                 indices: indices.split(",").map((it) => +it),
@@ -1120,7 +1128,7 @@ case "playlist":
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(({ musicLibrary, typeId }) =>
                 musicLibrary.rate(typeId, ratingFromInt(Math.abs(rating)))
               )
@@ -1132,7 +1140,7 @@ case "playlist":
             soapyHeaders: SoapyHeaders
           ) =>
             login(soapyHeaders?.credentials)
-              .then(splitId(id))
+              .then(withSplitId(id))
               .then(({ musicLibrary, type, typeId }) => {
                 switch (type) {
                   case "track":
