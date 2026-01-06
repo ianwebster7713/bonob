@@ -680,32 +680,44 @@ function bindSmapiSoapServiceToExpress(
                   case "playlists":
                     return musicLibrary
                       .playlists()
+                      .then((it) =>
+                        Promise.all(
+                          it.map((playlist) => {
+                            // todo: whats this odd copy all about, can we just delete it?
+                            return {
+                              id: playlist.id,
+                              name: playlist.name,
+                              coverArt: playlist.coverArt,
+                              // todo: are these every important?
+                              entries: [],
+                            };
+                          })
+                        )
+                      )
                       .then(slice2(paging))
-                      .then(([page, total]) => ({
-                        getExtendedMetadataResult: {
-                          count: page.length,
-                          index: paging._index,
-                          total,
+                      .then(([page, total]) => {
+                        return getMetadataResult({
                           mediaCollection: page.map((it) =>
                             playlist(urlWithToken(apiKey), it)
                           ),
-                        },
-                      }));
+                          index: paging._index,
+                          total,
+                        });
+                      });
                   case "playlist":
                     return musicLibrary
                       .playlist(typeId!)
-                      .then((pl) => pl.entries)
+                      .then((playlist) => playlist.entries)
                       .then(slice2(paging))
-                      .then(([page, total]) => ({
-                        getExtendedMetadataResult: {
-                          count: page.length,
-                          index: paging._index,
-                          total,
+                      .then(([page, total]) => {
+                        return getMetadataResult({
                           mediaMetadata: page.map((it) =>
                             track(urlWithToken(apiKey), it)
                           ),
-                        },
-                      }));                  
+                          index: paging._index,
+                          total,
+                        });
+                      });
                   default:
                     // unsupported "artists"
                     throw `Unsupported getExtendedMetadata id=${id}`;
