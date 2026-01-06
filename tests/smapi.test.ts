@@ -1174,12 +1174,12 @@ describe("wsdl api", () => {
                       title: "Playlists",
                       albumArtURI: iconArtURI(bonobUrl, "playlists").href(),
                       itemType: "container",
-                      canEnumerate: true,
                       attributes: {
                         readOnly: "false",
                         renameable: "false",
                         userContent: "true",
                       },
+                      canEnumerate: true,
                     },
                     {
                       id: "genres",
@@ -1280,6 +1280,7 @@ describe("wsdl api", () => {
                         renameable: "false",
                         userContent: "true",
                       },
+                      canEnumerate: true,
                     },
                     {
                       id: "genres",
@@ -1504,6 +1505,7 @@ describe("wsdl api", () => {
                     getMetadataResult({
                       mediaCollection: playlists.map((playlist) => ({
                         itemType: "container",
+                        canEnumerate: true,
                         id: `playlist:${playlist.id}`,
                         title: playlist.name,
                         albumArtURI: coverArtURI(
@@ -1511,7 +1513,6 @@ describe("wsdl api", () => {
                           playlist
                         ).href(),
                         canPlay: true,
-                        canEnumerate: true,
                         attributes: {
                           readOnly: "false",
                           userContent: "false",
@@ -1537,6 +1538,7 @@ describe("wsdl api", () => {
                       mediaCollection: [playlists[1]!, playlists[2]!].map(
                         (playlist) => ({
                           itemType: "container",
+                          canEnumerate: true,
                           id: `playlist:${playlist.id}`,
                           title: playlist.name,
                           albumArtURI: coverArtURI(
@@ -1544,7 +1546,6 @@ describe("wsdl api", () => {
                             playlist
                           ).href(),
                           canPlay: true,
-                          canEnumerate: true,
                           attributes: {
                             readOnly: "false",
                             userContent: "false",
