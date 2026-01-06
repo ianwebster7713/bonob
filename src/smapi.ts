@@ -267,11 +267,12 @@ type PlaylistLike = Pick<Playlist, "id" | "name" | "coverArt">;
 
 const playlist = (bonobUrl: URLBuilder, playlist: PlaylistLike) => ({
 //const playlist = (bonobUrl: URLBuilder, playlist: Playlist) => ({
-  itemType: "playlist",
+  itemType: "container",
   id: `playlist:${playlist.id}`,
   title: playlist.name,
   albumArtURI: coverArtURI(bonobUrl, playlist).href(),
   canPlay: true,
+  canEnumerate: true,
   attributes: {
     readOnly: false,
     userContent: false,
@@ -676,32 +677,20 @@ function bindSmapiSoapServiceToExpress(
                         // </getExtendedMetadataResult>
                       },
                     }));
-                  case "playlists": {
-                    const safeIndex =
-                      typeof index === "number" && Number.isFinite(index)
-                        ? index
-                        : 0;
-                    const safeCount =
-                      typeof count === "number" && Number.isFinite(count)
-                        ? count
-                        : 100;
-
-                    const safePaging = { _index: safeIndex, _count: safeCount };
-
+                  case "playlists":
                     return musicLibrary
                       .playlists()
-                      .then(slice2(safePaging))
+                      .then(slice2(paging))
                       .then(([page, total]) => ({
                         getExtendedMetadataResult: {
                           count: page.length,
-                          index: safePaging._index,
+                          index: paging._index,
                           total,
                           mediaCollection: page.map((it) =>
                             playlist(urlWithToken(apiKey), it)
                           ),
                         },
                       }));
-                  }
                   case "playlist":
                     return musicLibrary
                       .playlist(typeId!)
@@ -792,7 +781,8 @@ function bindSmapiSoapServiceToExpress(
                           id: "playlists",
                           title: lang("playlists"),
                           albumArtURI: iconArtURI(bonobUrl, "playlists").href(),
-                          itemType: "playlist",
+                          itemType: "container",
+                          canEnumerate: true,
                           attributes: {
                             readOnly: false,
                             userContent: true,
